@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 1. 博主/管理员表 (极简，单用户系统)
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // 加密存储 (bcrypt)
+  createdAt DateTime @default(now())
+}
+
+// 2. 站点动态配置表 (用于“关于我”、Slogan、头像的动态修改)
+// 这是一个单行表，永远只读取 ID 为 1 的记录
+model SiteConfig {
+  id          Int      @id @default(1)
+  avatarUrl   String?  // 头像链接
+  nickname    String   @default("My Name")
+  slogan      String?  // 一句话介绍
+  aboutMe     String?  // "关于我"页面的 Markdown 源码
+  socialLinks String?  // 存 JSON String: { github: "...", email: "..." } - SQLite不支持Json类型，用String代替
+}
+
+// 3. 文章表
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique // 自定义 URL，如 /blog/my-first-post
+  excerpt     String?  // 摘要
+  content     String   // Markdown 源码
+  coverImage  String?  // 封面图 URL
+  published   Boolean  @default(false) // 是否发布
+  pinned      Boolean  @default(false) // 是否置顶
+
+  // 关联分类 (为了简化，这里使用 String 存 Tags，用逗号分隔，不建 Tag 表 - SQLite不支持数组类型)
+  tags        String? 
+  category    String?  // 分类名称，如 "技术", "生活"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  comments    Comment[] // 关联评论
+}
+
+// 4. 评论表 (访客无需登录)
+model Comment {
+  id        String   @id @default(cuid())
+  nickname  String   // 访客昵称
+  content   String   // 评论内容
+  isAdmin   Boolean  @default(false) // 是否是博主回复
+  isApproved Boolean @default(false) // 审核状态：false=待审, true=公开
+
+  createdAt DateTime @default(now())
+
+  // 关联文章
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  // 支持简单的嵌套回复 (父子评论)
+  parentId  String?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+}

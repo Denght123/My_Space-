@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📘 极简个人博客系统 (Personal Blog)
 
-## Getting Started
+这是一个基于 **Next.js 14** 构建的现代化、极简风格的个人博客系统。专为开发者设计，拥有轻量级的管理后台、Markdown 写作体验以及完善的评论互动功能。
 
-First, run the development server:
+## ✨ 特性 (Features)
+
+- **⚡️ 现代技术栈**: 采用 Next.js 14 (App Router), React 18, TypeScript 构建。
+- **🎨 优雅设计**: 使用 Tailwind CSS + Shadcn/ui (推荐) 打造的极简 UI。
+- **📝 Markdown 支持**: 内置 Markdown 渲染与代码高亮，专注写作体验。
+- **🔐 安全认证**: 集成 NextAuth.js (v5)，提供安全的后台登录保护。
+- **🗃️ 数据存储**: Prisma ORM + SQLite (默认)，零配置成本，轻松迁移到 Postgres/MySQL。
+- **💬 评论系统**: 内置访客评论功能，支持后台审核与回复。
+- **⚙️ 动态配置**: 站点名称、个人介绍、头像等均可在后台动态修改。
+
+## 🛠️ 技术栈 (Tech Stack)
+
+- **框架**: [Next.js 14](https://nextjs.org/)
+- **语言**: TypeScript
+- **样式**: Tailwind CSS
+- **数据库**: SQLite (via Prisma ORM)
+- **认证**: NextAuth.js v5 Beta
+- **Markdown**: react-markdown, rehype-highlight
+
+## 🚀 快速开始 (Getting Started)
+
+### 1. 克隆项目
+
+```bash
+git clone https://your-repo-url.git
+cd personal-blog
+```
+
+### 2. 安装依赖
+
+```bash
+npm install
+# 或
+pnpm install
+```
+
+### 3. 初始化数据库
+
+项目使用 Prisma 管理数据库，首次运行需要生成 SQLite 文件。
+
+```bash
+# 生成 Prisma Client
+npx prisma generate
+
+# 迁移数据库结构
+npx prisma migrate dev --name init
+```
+
+### 4. 启动开发服务器
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+访问 [http://localhost:3000](http://localhost:3000) 查看前台，访问 [http://localhost:3000/login](http://localhost:3000/login) 进入后台管理。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📂 项目结构
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```text
+├── prisma/              # 数据库模型与配置
+├── public/              # 静态资源
+├── src/
+│   ├── app/             # Next.js App Router 路由
+│   │   ├── (admin)/     # 后台管理路由 (受保护)
+│   │   ├── (auth)/      # 认证路由 (登录)
+│   │   ├── api/         # API 接口
+│   │   └── blog/        # 博客前台路由
+│   ├── components/      # React 组件
+│   ├── lib/             # 工具函数与数据库连接
+│   └── types/           # TS 类型定义
+└── ...
+```
 
-## Learn More
+## 📝 待办事项 (TODO)
 
-To learn more about Next.js, take a look at the following resources:
+- [ ] 完成 Auth.js 认证配置
+- [ ] 实现后台 Dashboard 首页统计
+- [ ] 集成 Markdown 编辑器
+- [ ] 完成文章发布与编辑功能
+- [ ] 实现前台文章列表与详情页渲染
+- [ ] 添加评论提交与审核功能
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+MIT © Your Name
