@@ -1,9 +1,10 @@
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Github, Mail, MapPin, Link as LinkIcon, LogOut } from "lucide-react";
+import { Github, Mail, MapPin, Link as LinkIcon, LogOut, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/space/actions";
+import Link from "next/link";
 
 export default async function ProfileCard() {
   const session = await auth();
@@ -14,17 +15,23 @@ export default async function ProfileCard() {
   // 优先显示当前登录的用户名，如果没有则显示配置的昵称
   const displayName = session?.user?.name || session?.user?.email || config?.nickname || "未登录";
 
+  const avatarUrl = config?.avatarUrl || "https://github.com/shadcn.png";
+  const slogan = config?.slogan || "全栈开发者";
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6 space-y-6 sticky top-24">
+    <div className="bg-white rounded-xl shadow-sm border p-6 space-y-6 md:sticky md:top-24">
       {/* Header */}
-      <div className="text-center space-y-3">
+      <div className="text-center space-y-3 relative">
+        <Link href="/space/edit" className="absolute right-0 top-0 text-gray-400 hover:text-gray-600 transition-colors" title="编辑资料">
+          <Edit className="w-4 h-4" />
+        </Link>
         <Avatar className="w-24 h-24 mx-auto border-4 border-white shadow-md">
-          <AvatarImage src={config?.avatarUrl || "https://github.com/shadcn.png"} />
+          <AvatarImage src={avatarUrl} />
           <AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div>
           <h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
-          <p className="text-sm text-gray-500 mt-1">{config?.slogan || "全栈开发者"}</p>
+          <p className="text-sm text-gray-500 mt-1">{slogan}</p>
         </div>
       </div>
 

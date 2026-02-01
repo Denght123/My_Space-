@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import PostCard from "./PostCard";
+import CreatePost from "./CreatePost";
 
 export default async function PostFeed() {
   const session = await auth();
@@ -19,23 +20,17 @@ export default async function PostFeed() {
         where: { userId: session?.user?.id },
         select: { userId: true },
       },
+      comments: {
+        orderBy: { createdAt: "desc" },
+        take: 3, // Initial comments to load
+      },
     },
   });
 
   return (
     <div className="space-y-6">
-      {/* Create Post Input Placeholder */}
-      <div className="bg-white rounded-xl shadow-sm border p-4 flex gap-4">
-        <div className="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center text-gray-500 font-bold">
-          {username.slice(0, 1).toUpperCase()}
-        </div>
-        <input 
-          type="text" 
-          placeholder="分享你的新鲜事..." 
-          className="flex-1 bg-gray-50 rounded-full px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-not-allowed"
-          disabled
-        />
-      </div>
+      {/* Create Post Input */}
+      <CreatePost user={session?.user} authorName={username} />
 
       {/* Feed */}
       {posts.map((post) => (

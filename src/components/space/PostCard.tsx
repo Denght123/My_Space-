@@ -9,17 +9,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { toggleLike } from "@/app/space/actions";
+import CommentSection from "./CommentSection";
 
 interface PostCardProps {
   post: any;
   currentUser?: any;
-  authorName?: string; // Add optional prop
+  authorName?: string; 
 }
 
 export default function PostCard({ post, currentUser, authorName = "博主" }: PostCardProps) {
   const [likes, setLikes] = useState(post.likeCount || 0);
   const [isLiked, setIsLiked] = useState(post.likes?.length > 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -120,12 +122,15 @@ export default function PostCard({ post, currentUser, authorName = "博主" }: P
             <span className="text-xs font-medium">{likes}</span>
           </Button>
           
-          <Link href={`/blog/${post.slug}#comments`}>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-gray-500 hover:text-blue-500">
-              <MessageSquare className="w-4 h-4" />
-              <span className="text-xs font-medium">{post._count?.comments || 0}</span>
-            </Button>
-          </Link>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-1.5 text-gray-500 hover:text-blue-500"
+            onClick={() => setShowComments(!showComments)}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span className="text-xs font-medium">{post._count?.comments || 0}</span>
+          </Button>
 
           <Button variant="ghost" size="sm" className="gap-1.5 text-gray-500 hover:text-green-500" onClick={handleShare}>
             <Share2 className="w-4 h-4" />
@@ -133,6 +138,14 @@ export default function PostCard({ post, currentUser, authorName = "博主" }: P
           </Button>
         </div>
       </div>
+
+      {showComments && (
+        <CommentSection 
+          postId={post.id} 
+          comments={post.comments || []} 
+          currentUser={currentUser}
+        />
+      )}
     </article>
   );
 }

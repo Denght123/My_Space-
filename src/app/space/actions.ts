@@ -5,6 +5,67 @@ import { auth, signOut } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+export async function createPost(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) {
+    return { error: "请先登录" };
+  }
+
+  const content = formData.get("content") as string;
+  if (!content || !content.trim()) {
+    return { error: "内容不能为空" };
+  }
+
+  try {
+    // Generate a slug from timestamp
+    const slug = `post-${Date.now()}`;
+    
+    await db.post.create({
+      data: {
+        title: content.slice(0, 50) + (content.length > 50 ? "..." : ""),
+        content: content,
+        slug: slug,
+        published: true,
+        // Since we don't have author relation in Post model yet, we just create it
+        // Ideally we should add authorId to Post model
+      }
+    });
+
+    revalidatePath("/space");
+    return { success: true };
+  } catch (error) {
+    console.error("Create post error:", error);
+    return { error: "发布失败" };
+  }
+}
+
+export async function createComment(formData: FormData) {
+  const postId = formData.get("postId") as string;
+  const content = formData.get("content") as string;
+  const nickname = formData.get("nickname") as string || "访客";
+
+  if (!content || !content.trim()) {
+    return { error: "内容不能为空" };
+  }
+
+  try {
+    await db.comment.create({
+      data: {
+        postId,
+        content,
+        nickname,
+        isApproved: true, // Auto-approve for now in Space
+      }
+    });
+
+    revalidatePath("/space");
+    return { success: true };
+  } catch (error) {
+    console.error("Comment error:", error);
+    return { error: "评论失败" };
+  }
+}
+
 export async function logout() {
   await signOut({ redirect: false });
   redirect("/login");
