@@ -3,10 +3,14 @@ import { auth } from "@/auth";
 import PostCard from "./PostCard";
 import CreatePost from "./CreatePost";
 
-export default async function PostFeed() {
+export default async function PostFeed({ userId }: { userId?: string }) {
   const session = await auth();
   
-  // Fetch current user details to get latest avatar
+  // If userId is provided, show posts for that user. Otherwise show current user's posts.
+  const targetUserId = userId || session?.user?.id;
+  const isOwnProfile = session?.user?.id === targetUserId;
+
+  // Fetch current user details to get latest avatar (for CreatePost)
   let userAvatar = null;
   if (session?.user?.id) {
     const user = await db.user.findUnique({ 
@@ -21,7 +25,7 @@ export default async function PostFeed() {
   const posts = await db.post.findMany({
     where: { 
       published: true,
-      authorId: session?.user?.id 
+      authorId: targetUserId // Filter by target user
     },
     orderBy: { createdAt: "desc" },
     include: {
@@ -48,8 +52,10 @@ export default async function PostFeed() {
 
   return (
     <div className="space-y-6">
-      {/* Create Post Input - Pass avatarUrl */}
-      <CreatePost user={session?.user} authorName={username} avatarUrl={userAvatar} />
+      {/* Create Post Input - Only show on own profile */}
+      {isOwnProfile && (
+        <CreatePost user={session?.user} authorName={username} avatarUrl={userAvatar} />
+      )}
 
       {/* Feed */}
       {posts.map((post) => (

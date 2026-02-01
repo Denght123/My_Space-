@@ -6,15 +6,21 @@ import { Button } from "@/components/ui/button";
 import { logout } from "@/app/space/actions";
 import Link from "next/link";
 
-export default async function ProfileCard() {
+export default async function ProfileCard({ userId }: { userId?: string }) {
   const session = await auth();
   
-  if (!session?.user?.id) {
+  // If userId is provided, fetch that user. Otherwise fetch current session user.
+  const targetUserId = userId || session?.user?.id;
+
+  if (!targetUserId) {
     return <div className="p-4 bg-white rounded-xl shadow-sm border text-center">请先登录</div>;
   }
 
   // Fetch user data directly
-  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  const user = await db.user.findUnique({ where: { id: targetUserId } });
+  
+  // Determine if this is the current user's own profile
+  const isOwnProfile = session?.user?.id === targetUserId;
   
   const social = user?.socialLinks ? JSON.parse(user.socialLinks) : { github: "#", email: "mailto:example@com" };
   
@@ -27,9 +33,11 @@ export default async function ProfileCard() {
     <div className="bg-white rounded-xl shadow-sm border p-6 space-y-6 md:sticky md:top-24">
       {/* Header */}
       <div className="text-center space-y-3 relative">
-        <Link href="/space/edit" className="absolute right-0 top-0 text-gray-400 hover:text-gray-600 transition-colors" title="编辑资料">
-          <Edit className="w-4 h-4" />
-        </Link>
+        {isOwnProfile && (
+          <Link href="/space/edit" className="absolute right-0 top-0 text-gray-400 hover:text-gray-600 transition-colors" title="编辑资料">
+            <Edit className="w-4 h-4" />
+          </Link>
+        )}
         <Avatar className="w-24 h-24 mx-auto border-4 border-white shadow-md">
           <AvatarImage src={avatarUrl} />
           <AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -73,13 +81,15 @@ export default async function ProfileCard() {
           </div>
         </div>
 
-        {/* Logout Button */}
-        <form action={logout}>
-          <Button variant="outline" className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 border-red-100 gap-2">
-            <LogOut className="w-4 h-4" />
-            退出登录
-          </Button>
-        </form>
+        {/* Logout Button - Only show on own profile */}
+        {isOwnProfile && (
+          <form action={logout}>
+            <Button variant="outline" className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 border-red-100 gap-2">
+              <LogOut className="w-4 h-4" />
+              退出登录
+            </Button>
+          </form>
+        )}
       </div>
     </div>
   );
