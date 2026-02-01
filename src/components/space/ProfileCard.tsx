@@ -58,22 +58,18 @@ export default async function ProfileCard() {
 
       {/* Info */}
       <div className="space-y-4 pt-2">
+        {/* About Me Section */}
+        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+          <h3 className="font-semibold text-gray-900 mb-1">简介</h3>
+          <p className="line-clamp-4 leading-relaxed">
+            {user?.aboutMe || "这位博主很懒，还没有填写简介..."}
+          </p>
+        </div>
+
         <div className="space-y-3 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-gray-400" />
             <span>{location}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Github className="w-4 h-4 text-gray-400" />
-            <a href={social.github} target="_blank" className="hover:text-blue-600 transition-colors">GitHub</a>
-          </div>
-          <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-gray-400" />
-            <a href={social.email} className="hover:text-blue-600 transition-colors">发送邮件</a>
-          </div>
-          <div className="flex items-center gap-2">
-            <LinkIcon className="w-4 h-4 text-gray-400" />
-            <a href="#" className="hover:text-blue-600 transition-colors">个人作品集</a>
           </div>
         </div>
 
