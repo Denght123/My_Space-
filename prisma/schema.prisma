@@ -60,6 +60,21 @@ model Post {
   // 关联作者
   author      User?     @relation(fields: [authorId], references: [id])
   authorId    String?   // 暂时可选，兼容旧数据
+  
+  attachments Attachment[] // 关联附件
+}
+
+// 6. 附件表 (新增)
+model Attachment {
+  id        String   @id @default(cuid())
+  url       String
+  filename  String
+  fileType  String?  // image/png, application/pdf etc
+  size      Int?     // bytes
+  createdAt DateTime @default(now())
+
+  post      Post?    @relation(fields: [postId], references: [id])
+  postId    String?  // 可选，如果是上传完还没发文章，这里可以为空
 }
 
 // 4. 评论表
