@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { createPost } from "@/app/space/actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Image, Send } from "lucide-react";
 
 export default function CreatePost({ user, authorName, avatarUrl }: { user: any, authorName: string, avatarUrl?: string | null }) {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
+    }
+  }, [content]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,11 +48,13 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
         {/* Avatar removed */}
         <div className="flex-1 space-y-3">
           <textarea
+            ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="分享你的新鲜事..."
-            className="w-full bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all min-h-[80px] resize-none"
+            className="w-full bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all min-h-[44px] resize-none overflow-hidden"
             disabled={isSubmitting}
+            rows={1}
           />
           <div className="flex justify-between items-center">
             <Button type="button" variant="ghost" size="sm" className="text-gray-500 hover:text-blue-600 gap-2">
