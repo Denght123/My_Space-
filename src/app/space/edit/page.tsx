@@ -1,20 +1,50 @@
-import { db } from "@/lib/db";
-import { auth } from "@/auth";
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export default async function EditProfilePage() {
-  const session = await auth();
-  const config = await db.siteConfig.findUnique({ where: { id: 1 } });
-  
-  const social = config?.socialLinks ? JSON.parse(config.socialLinks) : { github: "", email: "" };
-  const displayName = session?.user?.name || session?.user?.email || config?.nickname || "未登录";
+export default function EditProfilePage({ 
+  searchParams 
+}: { 
+  searchParams: { [key: string]: string | string[] | undefined } 
+}) {
+  const router = useRouter();
+  // Mock data for UI development - replace with server data later
+  const [previewUrl, setPreviewUrl] = useState("https://github.com/shadcn.png");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    toast.success("保存成功", {
+      duration: 2000,
+    });
+
+    setTimeout(() => {
+       setIsSaving(false);
+    }, 800);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -33,7 +63,7 @@ export default async function EditProfilePage() {
           </div>
         </div>
 
-        <form className="space-y-8">
+        <form className="space-y-8" onSubmit={handleSubmit}>
           {/* Basic Info Card */}
           <Card>
             <CardHeader>
@@ -45,20 +75,30 @@ export default async function EditProfilePage() {
               {/* Avatar Section */}
               <div className="flex items-center gap-6">
                 <Avatar className="w-20 h-20 border">
-                  <AvatarImage src={config?.avatarUrl || "https://github.com/shadcn.png"} />
-                  <AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={previewUrl} className="object-cover" />
+                  <AvatarFallback>ME</AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
-                  <Label>头像链接</Label>
-                  <div className="flex gap-2">
+                  <Label>头像</Label>
+                  <div className="flex items-center gap-4">
                     <Input 
-                      name="avatarUrl" 
-                      defaultValue={config?.avatarUrl || ""} 
-                      placeholder="输入图片 URL" 
-                      className="max-w-md"
+                      id="avatar-upload" 
+                      type="file" 
+                      accept="image/*"
+                      className="hidden" 
+                      onChange={handleFileChange}
                     />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                      className="gap-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      上传图片
+                    </Button>
+                    <p className="text-xs text-gray-500">支持 JPG, PNG, GIF</p>
                   </div>
-                  <p className="text-xs text-gray-500">支持 JPG, PNG, GIF 链接</p>
                 </div>
               </div>
 
@@ -69,7 +109,6 @@ export default async function EditProfilePage() {
                   <Input 
                     id="nickname" 
                     name="nickname" 
-                    defaultValue={config?.nickname || ""} 
                     placeholder="你的名字" 
                   />
                 </div>
@@ -79,7 +118,6 @@ export default async function EditProfilePage() {
                     id="location" 
                     name="location" 
                     placeholder="例如：中国 上海" 
-                    disabled // 暂时未在数据库建字段，仅展示 UI
                   />
                 </div>
               </div>
@@ -89,7 +127,6 @@ export default async function EditProfilePage() {
                 <Input 
                   id="slogan" 
                   name="slogan" 
-                  defaultValue={config?.slogan || ""} 
                   placeholder="一句话介绍你自己" 
                 />
               </div>
@@ -99,7 +136,6 @@ export default async function EditProfilePage() {
                 <Textarea 
                   id="aboutMe" 
                   name="aboutMe" 
-                  defaultValue={config?.aboutMe || ""} 
                   placeholder="详细介绍你的经历..." 
                   rows={4}
                 />
@@ -121,7 +157,6 @@ export default async function EditProfilePage() {
                     <Input 
                       id="github" 
                       name="github" 
-                      defaultValue={social.github || ""} 
                       placeholder="https://github.com/username" 
                       className="pl-9"
                     />
@@ -137,7 +172,6 @@ export default async function EditProfilePage() {
                     <Input 
                       id="email" 
                       name="email" 
-                      defaultValue={social.email || ""} 
                       placeholder="mailto:you@example.com" 
                       className="pl-9"
                     />
@@ -155,9 +189,22 @@ export default async function EditProfilePage() {
             <Link href="/space">
               <Button variant="outline" type="button" className="bg-white/80 backdrop-blur-sm">取消</Button>
             </Link>
-            <Button type="button" className="bg-black hover:bg-gray-800 text-white shadow-lg">
-              <Save className="w-4 h-4 mr-2" />
-              保存修改
+            <Button 
+              type="submit" 
+              className="bg-black hover:bg-gray-800 text-white shadow-lg"
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  保存中...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  保存修改
+                </>
+              )}
             </Button>
           </div>
         </form>
