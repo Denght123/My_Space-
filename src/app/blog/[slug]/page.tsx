@@ -11,6 +11,10 @@ export default async function BlogPostPage({
 }: {
   params: { slug: string };
 }) {
+  if (!params.slug) {
+    notFound();
+  }
+
   const post = await db.post.findUnique({
     where: { slug: params.slug },
     include: {

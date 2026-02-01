@@ -53,7 +53,14 @@ export async function login(formData: FormData) {
     console.log(`[Action] Manual verification for: ${username}`);
 
     // 1. Manual User Lookup
-    const user = await db.user.findUnique({ where: { username } });
+    const user = await db.user.findUnique({ 
+      where: { username },
+      select: {
+        id: true,
+        username: true,
+        password: true,
+      }
+    });
     
     if (!user) {
       console.log(`[Action] User not found: ${username}`);

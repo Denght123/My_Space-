@@ -8,15 +8,20 @@ import Link from "next/link";
 
 export default async function ProfileCard() {
   const session = await auth();
-  const config = await db.siteConfig.findUnique({ where: { id: 1 } });
   
-  const social = config?.socialLinks ? JSON.parse(config.socialLinks) : { github: "#", email: "mailto:example@com" };
-  
-  // 优先显示当前登录的用户名，如果没有则显示配置的昵称
-  const displayName = session?.user?.name || session?.user?.email || config?.nickname || "未登录";
+  if (!session?.user?.id) {
+    return <div className="p-4 bg-white rounded-xl shadow-sm border text-center">请先登录</div>;
+  }
 
-  const avatarUrl = config?.avatarUrl || "https://github.com/shadcn.png";
-  const slogan = config?.slogan || "全栈开发者";
+  // Fetch user data directly
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  
+  const social = user?.socialLinks ? JSON.parse(user.socialLinks) : { github: "#", email: "mailto:example@com" };
+  
+  const displayName = user?.nickname || user?.username || "未登录";
+  const avatarUrl = user?.avatarUrl || "https://github.com/shadcn.png";
+  const slogan = user?.slogan || "全栈开发者";
+  const location = user?.location || "中国 上海";
 
   return (
     <div className="bg-white rounded-xl shadow-sm border p-6 space-y-6 md:sticky md:top-24">
@@ -56,7 +61,7 @@ export default async function ProfileCard() {
         <div className="space-y-3 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-gray-400" />
-            <span>中国 上海</span>
+            <span>{location}</span>
           </div>
           <div className="flex items-center gap-2">
             <Github className="w-4 h-4 text-gray-400" />

@@ -9,6 +9,12 @@ async function getUser(username: string) {
   try {
     const user = await db.user.findUnique({
       where: { username },
+      // Explicitly select fields to avoid crashing if DB schema is out of sync
+      select: {
+        id: true,
+        username: true,
+        password: true,
+      }
     });
     return user;
   } catch (error) {
@@ -19,6 +25,24 @@ async function getUser(username: string) {
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        // Cast to any because NextAuth User type might not have username by default
+        token.name = (user as any).username; 
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.name = token.name as string;
+      }
+      return session;
+    },
+  },
   providers: [
     Credentials({
       async authorize(credentials) {
