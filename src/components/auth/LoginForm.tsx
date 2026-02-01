@@ -58,7 +58,7 @@ export default function LoginForm() {
 
         setTimeout(() => {
           // Force reload to update session state
-          window.location.href = "/";
+          window.location.href = "/space";
         }, 2000);
       }
     } catch (error) {

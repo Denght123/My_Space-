@@ -16,6 +16,7 @@ model User {
   username  String   @unique
   password  String   // 加密存储 (bcrypt)
   createdAt DateTime @default(now())
+  likes     Like[]   // 用户点赞记录
 }
 
 // 2. 站点动态配置表 (用于“关于我”、Slogan、头像的动态修改)
@@ -26,7 +27,11 @@ model SiteConfig {
   nickname    String   @default("My Name")
   slogan      String?  // 一句话介绍
   aboutMe     String?  // "关于我"页面的 Markdown 源码
-  socialLinks String?  // 存 JSON String: { github: "...", email: "..." } - SQLite不支持Json类型，用String代替
+  socialLinks String?  // 存 JSON String: { github: "...", email: "..." }
+  
+  // 新增字段
+  skills      String?  // 存 JSON String: ["React", "Next.js", "Node.js"]
+  projects    String?  // 存 JSON String: [{ title: "...", url: "...", desc: "..." }]
 }
 
 // 3. 文章表
@@ -40,12 +45,14 @@ model Post {
   published   Boolean  @default(false) // 是否发布
   pinned      Boolean  @default(false) // 是否置顶
 
-  // 关联分类 (为了简化，这里使用 String 存 Tags，用逗号分隔，不建 Tag 表 - SQLite不支持数组类型)
+  // 关联分类 (为了简化，这里使用 String 存 Tags，用逗号分隔，不建 Tag 表)
   tags        String? 
   category    String?  // 分类名称，如 "技术", "生活"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   comments    Comment[] // 关联评论
+  likes       Like[]    // 关联点赞
+  likeCount   Int       @default(0) // 冗余字段，方便快速读取点赞数
 }
 
 // 4. 评论表 (访客无需登录)
@@ -65,4 +72,20 @@ model Comment {
   parentId  String?
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentReplies")
+}
+
+// 5. 点赞表 (记录谁点了赞，防止重复)
+// 这里的 userId 是可选的，因为我们可能允许匿名点赞(通过IP或LocalStorage限制)，但为了规范，先关联 User
+// 如果要支持匿名点赞，可以加一个 sessionId 字段
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?  // 可空，允许匿名点赞 (暂不实现匿名，先只做登录用户点赞，或者纯计数)
+
+  @@unique([postId, userId]) // 确保一个用户对一篇文章只能点赞一次
 }
