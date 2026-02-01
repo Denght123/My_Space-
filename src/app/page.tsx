@@ -18,10 +18,9 @@ export default function Home() {
         <div className="pt-8">
           <Link 
             href="/login" 
-            className="inline-flex items-center px-8 py-3 border border-black text-base font-medium text-black bg-transparent hover:bg-black hover:text-white transition-all duration-300"
+            className="inline-flex items-center justify-center px-8 py-3 rounded-full text-base font-medium text-white bg-black hover:scale-110 transition-transform duration-300 cursor-pointer min-w-[120px]"
           >
             登录
-            <ArrowRight className="ml-2 w-4 h-4" />
           </Link>
         </div>
       </div>

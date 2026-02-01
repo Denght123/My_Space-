@@ -88,5 +88,16 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* 全局禁止文字选中和光标闪烁，仅保留箭头光标 */
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+  
+  /* 恢复输入框的可选中状态 */
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+    cursor: text;
   }
 }

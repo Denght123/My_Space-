@@ -18,20 +18,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={`${inter.className} bg-white text-black antialiased`}>
+      <body className={`${inter.className} bg-white text-black antialiased cursor-default`}>
         <div className="min-h-screen flex flex-col">
           <header className="fixed top-0 w-full bg-white z-50">
             <div className="container mx-auto px-6 h-16 flex justify-between items-center">
               <h1 className="text-xl font-bold tracking-tight">
-                <Link href="/" className="hover:opacity-70 transition-opacity">MySpace</Link>
+                <Link href="/" className="hover:opacity-70 transition-opacity cursor-pointer">MySpace</Link>
               </h1>
               <nav>
-                <Link 
-                  href="/login" 
-                  className="text-sm font-medium hover:text-gray-500 transition-colors"
-                >
-                  登录
-                </Link>
+                {/* 顶部右侧登录模块已移除 */}
               </nav>
             </div>
           </header>
