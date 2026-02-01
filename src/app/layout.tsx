@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from 'sonner';
 import "./globals.css";
+import Link from 'next/link';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,27 +18,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-white text-black antialiased`}>
         <div className="min-h-screen flex flex-col">
-          <header className="border-b py-4">
-            <div className="container mx-auto px-4 flex justify-between items-center">
-              <h1 className="text-xl font-bold">MySpace</h1>
-              <nav className="space-x-4">
-                <a href="/" className="hover:underline">首页</a>
-                {/* 暂时使用 href 跳转，后续优化为 Link 组件 */}
-                <a href="/about" className="hover:underline">关于我</a>
+          <header className="fixed top-0 w-full bg-white z-50">
+            <div className="container mx-auto px-6 h-16 flex justify-between items-center">
+              <h1 className="text-xl font-bold tracking-tight">
+                <Link href="/" className="hover:opacity-70 transition-opacity">MySpace</Link>
+              </h1>
+              <nav>
+                <Link 
+                  href="/login" 
+                  className="text-sm font-medium hover:text-gray-500 transition-colors"
+                >
+                  登录
+                </Link>
               </nav>
             </div>
           </header>
-          <main className="flex-1 container mx-auto px-4 py-8">
+          {/* pt-16 是为了给 fixed header 留出空间 */}
+          <main className="flex-1 pt-16">
             {children}
           </main>
-          <footer className="border-t py-4 text-center text-sm text-gray-500">
-            <div className="container mx-auto px-4">
-              © {new Date().getFullYear()} MySpace. Built with Next.js & Tailwind.
-            </div>
-          </footer>
         </div>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

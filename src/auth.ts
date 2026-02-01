@@ -23,19 +23,32 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     Credentials({
       async authorize(credentials) {
         const parsedCredentials = z
-          .object({ username: z.string(), password: z.string().min(6) })
+          .object({ username: z.string(), password: z.string() }) // Removed .min(6) to ensure we verify logic, not schema
           .safeParse(credentials);
 
         if (parsedCredentials.success) {
           const { username, password } = parsedCredentials.data;
+          
+          console.log(`[Auth] Attempting login for: ${username}`);
+          
           const user = await getUser(username);
-          if (!user) return null;
+          if (!user) {
+            console.log(`[Auth] User not found: ${username}`);
+            throw new Error('UserNotRegistered');
+          }
+          
           const passwordsMatch = await bcrypt.compare(password, user.password);
- 
-          if (passwordsMatch) return user;
+          console.log(`[Auth] Password match result: ${passwordsMatch}`);
+          
+          if (passwordsMatch) {
+            return user;
+          } else {
+            console.log('[Auth] Password mismatch');
+            throw new Error('PasswordMismatch');
+          }
         }
         
-        console.log('Invalid credentials');
+        console.log('[Auth] Invalid input format');
         return null;
       },
     }),
