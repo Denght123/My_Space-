@@ -10,7 +10,7 @@ export default function Home() {
         </h1>
         
         <p className="text-xl text-gray-600 font-light tracking-wide">
-          这里是我的个人极简博客。
+          这里是个人极简博客。
           <br className="hidden sm:block" />
           分享技术，生活与思考。
         </p>
