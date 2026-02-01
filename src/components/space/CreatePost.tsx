@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Image, Send } from "lucide-react";
 
-export default function CreatePost({ user, authorName }: { user: any, authorName: string }) {
+export default function CreatePost({ user, authorName, avatarUrl }: { user: any, authorName: string, avatarUrl?: string | null }) {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,10 +37,7 @@ export default function CreatePost({ user, authorName }: { user: any, authorName
   return (
     <div className="bg-white rounded-xl shadow-sm border p-4 mb-6">
       <form onSubmit={handleSubmit} className="flex gap-4">
-        <Avatar className="w-10 h-10 flex-shrink-0">
-          <AvatarImage src={user?.image || "https://github.com/shadcn.png"} />
-          <AvatarFallback>{authorName.slice(0, 1).toUpperCase()}</AvatarFallback>
-        </Avatar>
+        {/* Avatar removed */}
         <div className="flex-1 space-y-3">
           <textarea
             value={content}

@@ -6,7 +6,16 @@ import CreatePost from "./CreatePost";
 export default async function PostFeed() {
   const session = await auth();
   
-  // 获取当前用户名
+  // Fetch current user details to get latest avatar
+  let userAvatar = null;
+  if (session?.user?.id) {
+    const user = await db.user.findUnique({ 
+      where: { id: session.user.id },
+      select: { avatarUrl: true } 
+    });
+    userAvatar = user?.avatarUrl;
+  }
+  
   const username = session?.user?.name || "匿名用户";
 
   const posts = await db.post.findMany({
@@ -22,15 +31,22 @@ export default async function PostFeed() {
       },
       comments: {
         orderBy: { createdAt: "desc" },
-        take: 3, // Initial comments to load
+        take: 3, 
       },
+      author: { // Include author info
+        select: {
+          username: true,
+          nickname: true,
+          avatarUrl: true
+        }
+      }
     },
   });
 
   return (
     <div className="space-y-6">
-      {/* Create Post Input */}
-      <CreatePost user={session?.user} authorName={username} />
+      {/* Create Post Input - Pass avatarUrl */}
+      <CreatePost user={session?.user} authorName={username} avatarUrl={userAvatar} />
 
       {/* Feed */}
       {posts.map((post) => (
@@ -38,7 +54,9 @@ export default async function PostFeed() {
           key={post.id} 
           post={post} 
           currentUser={session?.user} 
-          authorName={username} // Pass the username
+          // Prefer nickname, then username, then default
+          authorName={post.author?.nickname || post.author?.username || "匿名用户"} 
+          authorAvatar={post.author?.avatarUrl} // Pass author avatar
         />
       ))}
 

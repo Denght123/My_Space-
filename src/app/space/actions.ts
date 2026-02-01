@@ -26,8 +26,8 @@ export async function createPost(formData: FormData) {
         content: content,
         slug: slug,
         published: true,
-        // Since we don't have author relation in Post model yet, we just create it
-        // Ideally we should add authorId to Post model
+        // Associate with current user
+        authorId: session.user.id, 
       }
     });
 

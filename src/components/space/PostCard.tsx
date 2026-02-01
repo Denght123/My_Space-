@@ -32,9 +32,10 @@ interface PostCardProps {
   post: any;
   currentUser?: any;
   authorName?: string; 
+  authorAvatar?: string | null;
 }
 
-export default function PostCard({ post, currentUser, authorName = "博主" }: PostCardProps) {
+export default function PostCard({ post, currentUser, authorName = "博主", authorAvatar }: PostCardProps) {
   const router = useRouter();
   const [likes, setLikes] = useState(post.likeCount || 0);
   const [isLiked, setIsLiked] = useState(post.likes?.length > 0);
@@ -118,7 +119,7 @@ export default function PostCard({ post, currentUser, authorName = "博主" }: P
         <div className="flex justify-between items-start">
           <div className="flex gap-3">
             <Avatar className="w-10 h-10">
-              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarImage src={authorAvatar || "https://github.com/shadcn.png"} />
               <AvatarFallback>{authorName.slice(0, 1).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
@@ -148,18 +149,18 @@ export default function PostCard({ post, currentUser, authorName = "博主" }: P
           </DropdownMenu>
         </div>
 
-        {/* Content */}
-        <div className="space-y-2">
-          <Link href={`/blog/${post.slug}`} className="block group">
-            <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {post.title}
-            </h3>
-            <p className="text-gray-600 line-clamp-3 leading-relaxed">
-              {post.excerpt || "点击阅读全文..."}
-            </p>
-          </Link>
-          
-          {/* Tags */}
+      {/* Content */}
+      <div className="space-y-2">
+        <div className="block group cursor-default">
+          <h3 className="text-lg font-bold text-gray-900">
+            {post.title}
+          </h3>
+          <div className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+            {post.content}
+          </div>
+        </div>
+        
+        {/* Tags */}
           {post.tags && (
             <div className="flex gap-2 pt-2">
               <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
