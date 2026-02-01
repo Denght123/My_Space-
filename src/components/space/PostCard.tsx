@@ -8,14 +8,15 @@ import { Heart, MessageSquare, Share2, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { toggleLike } from "@/app/space/actions"; // We'll create this
+import { toggleLike } from "@/app/space/actions";
 
 interface PostCardProps {
-  post: any; // We'll define proper type later
+  post: any;
   currentUser?: any;
+  authorName?: string; // Add optional prop
 }
 
-export default function PostCard({ post, currentUser }: PostCardProps) {
+export default function PostCard({ post, currentUser, authorName = "博主" }: PostCardProps) {
   const [likes, setLikes] = useState(post.likeCount || 0);
   const [isLiked, setIsLiked] = useState(post.likes?.length > 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
@@ -70,10 +71,10 @@ export default function PostCard({ post, currentUser }: PostCardProps) {
         <div className="flex gap-3">
           <Avatar className="w-10 h-10">
             <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>AD</AvatarFallback>
+            <AvatarFallback>{authorName.slice(0, 1).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-semibold text-gray-900">Admin User</div>
+            <div className="font-semibold text-gray-900">{authorName}</div>
             <div className="text-xs text-gray-500">
               {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: zhCN })}
             </div>

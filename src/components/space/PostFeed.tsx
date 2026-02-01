@@ -5,6 +5,9 @@ import PostCard from "./PostCard";
 export default async function PostFeed() {
   const session = await auth();
   
+  // 获取当前用户名
+  const username = session?.user?.name || "匿名用户";
+
   const posts = await db.post.findMany({
     where: { published: true },
     orderBy: { createdAt: "desc" },
@@ -23,7 +26,9 @@ export default async function PostFeed() {
     <div className="space-y-6">
       {/* Create Post Input Placeholder */}
       <div className="bg-white rounded-xl shadow-sm border p-4 flex gap-4">
-        <div className="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0" />
+        <div className="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center text-gray-500 font-bold">
+          {username.slice(0, 1).toUpperCase()}
+        </div>
         <input 
           type="text" 
           placeholder="分享你的新鲜事..." 
@@ -34,7 +39,12 @@ export default async function PostFeed() {
 
       {/* Feed */}
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} currentUser={session?.user} />
+        <PostCard 
+          key={post.id} 
+          post={post} 
+          currentUser={session?.user} 
+          authorName={username} // Pass the username
+        />
       ))}
 
       {posts.length === 0 && (

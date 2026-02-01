@@ -11,31 +11,10 @@ export default function SpacePage() {
             <ProfileCard />
           </div>
 
-          {/* Main Content (Feed) - 6 cols */}
-          <main className="lg:col-span-6">
+          {/* Main Content (Feed) - 9 cols (Expanded) */}
+          <main className="lg:col-span-9">
             <PostFeed />
           </main>
-
-          {/* Right Sidebar (Widgets) - 3 cols */}
-          <div className="hidden lg:block lg:col-span-3 space-y-6">
-            {/* Project Widget */}
-            <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-24">
-              <h3 className="font-bold text-gray-900 mb-4">精选项目</h3>
-              <div className="space-y-4">
-                {[1, 2].map((i) => (
-                  <div key={i} className="group cursor-pointer">
-                    <div className="aspect-video bg-gray-100 rounded-lg mb-2 group-hover:opacity-90 transition-opacity" />
-                    <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                      Personal Blog System
-                    </h4>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Next.js 14, Tailwind, Prisma
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

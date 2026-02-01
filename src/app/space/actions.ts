@@ -1,8 +1,14 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+export async function logout() {
+  await signOut({ redirect: false });
+  redirect("/login");
+}
 
 export async function toggleLike(postId: string) {
   const session = await auth();
