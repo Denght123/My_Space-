@@ -5,11 +5,11 @@ import { toast } from "sonner";
 import { createPost } from "@/app/space/actions";
 import { uploadFile } from "@/app/space/upload-action";
 import { Button } from "@/components/ui/button";
-import { 
-  Image as ImageIcon, 
-  Send, 
-  Paperclip, 
-  Code, 
+import {
+  Image as ImageIcon,
+  Send,
+  Paperclip,
+  Code,
   X
 } from "lucide-react";
 import {
@@ -41,10 +41,10 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const prevText = textarea.value;
-    
+
     const newText = prevText.substring(0, start) + text + prevText.substring(end);
     setContent(newText);
-    
+
     setTimeout(() => {
       textarea.focus();
       textarea.selectionStart = textarea.selectionEnd = start + text.length + cursorOffset;
@@ -71,7 +71,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
 
     try {
       const res = await uploadFile(formData);
-      
+
       if (res.error) {
         toast.error(res.error, { id: toastId });
       } else {
@@ -100,7 +100,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
     try {
       const formData = new FormData();
       formData.append("content", content);
-      
+
       const result = await createPost(formData);
       if (result.error) {
         toast.error(result.error);
@@ -138,15 +138,15 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
         {/* Toolbar */}
         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
           <div className="flex gap-1 items-center">
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
               // Accept images and common docs
               accept="image/*,.pdf,.doc,.docx,.txt"
               onChange={handleFileChange}
             />
-            
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -168,9 +168,9 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
             </TooltipProvider>
           </div>
 
-          <Button 
-            type="submit" 
-            size="sm" 
+          <Button
+            type="submit"
+            size="sm"
             className="bg-black hover:bg-gray-800 text-white gap-2 rounded-full px-6 transition-all"
             disabled={!content.trim() || isSubmitting || isUploading}
           >

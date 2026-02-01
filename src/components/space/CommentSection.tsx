@@ -69,9 +69,6 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
       <div className="space-y-4">
         {commentList.map((comment) => (
           <div key={comment.id} className="flex gap-3">
-            <Avatar className="w-8 h-8">
-              <AvatarFallback className="text-xs">{comment.nickname.slice(0, 1)}</AvatarFallback>
-            </Avatar>
             <div className="flex-1 bg-gray-50 rounded-lg p-3 text-sm">
               <div className="flex justify-between items-center mb-1">
                 <span className="font-semibold text-gray-900">{comment.nickname}</span>
@@ -87,9 +84,6 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
 
       {/* Comment Input */}
       <form onSubmit={handleSubmit} className="flex gap-3">
-        <Avatar className="w-8 h-8">
-          <AvatarFallback>{currentUser?.name?.slice(0, 1) || "G"}</AvatarFallback>
-        </Avatar>
         <div className="flex-1 flex gap-2">
           <input
             type="text"

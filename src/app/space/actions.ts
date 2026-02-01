@@ -81,26 +81,44 @@ export async function toggleLike(postId: string) {
   const userId = session.user.id;
 
   try {
-    // Check if liked
-    // Note: Since schema migration might have failed, we wrap this in try-catch
-    // If 'Like' model doesn't exist yet, this will throw.
-    
-    // We use a transaction to ensure consistency
-    // But since we can't use db.like because of generation issue, we might need to fallback to increment only
-    // However, I will write the code assuming generation works eventually.
-    
-    // WORKAROUND: If prisma client is not updated, we can't use db.like.
-    // I'll try to use raw query or just increment post.likeCount for now to be safe until migration runs.
-    
-    // Safe mode: Just update the count on Post
-    const post = await db.post.findUnique({ where: { id: postId } });
-    if (!post) return { error: "文章不存在" };
-
-    // Simply increment for now (since Like table might not exist)
-    await db.post.update({
-      where: { id: postId },
-      data: { likeCount: { increment: 1 } },
+    // Check if user already liked the post
+    const existingLike = await db.like.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId,
+        },
+      },
     });
+
+    if (existingLike) {
+      // Un-like: Delete record and decrement count
+      await db.$transaction([
+        db.like.delete({
+          where: {
+            id: existingLike.id,
+          },
+        }),
+        db.post.update({
+          where: { id: postId },
+          data: { likeCount: { decrement: 1 } },
+        }),
+      ]);
+    } else {
+      // Like: Create record and increment count
+      await db.$transaction([
+        db.like.create({
+          data: {
+            postId,
+            userId,
+          },
+        }),
+        db.post.update({
+          where: { id: postId },
+          data: { likeCount: { increment: 1 } },
+        }),
+      ]);
+    }
 
     revalidatePath("/space");
     return { success: true };

@@ -19,7 +19,10 @@ export default async function PostFeed() {
   const username = session?.user?.name || "匿名用户";
 
   const posts = await db.post.findMany({
-    where: { published: true },
+    where: { 
+      published: true,
+      authorId: session?.user?.id 
+    },
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
