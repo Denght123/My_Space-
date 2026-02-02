@@ -28,6 +28,7 @@ model User {
   // 关联
   likes       Like[]   // 用户点赞记录
   posts       Post[]   // 用户发布的文章
+  searchHistory SearchHistory[] // 搜索历史
 }
 
 // 2. 站点动态配置表 (保留用于全站公告等，不再存个人信息)
@@ -64,7 +65,7 @@ model Post {
   attachments Attachment[] // 关联附件
 }
 
-// 6. 附件表 (新增)
+// 6. 附件表
 model Attachment {
   id        String   @id @default(cuid())
   url       String
@@ -108,4 +109,16 @@ model Like {
   userId    String?
 
   @@unique([postId, userId])
+}
+
+// 7. 搜索历史表
+model SearchHistory {
+  id        String   @id @default(cuid())
+  query     String   // 搜索的关键词 (用户名)
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@unique([userId, query]) // 确保每个用户对同一个关键词只有一条记录(更新时间即可)
 }

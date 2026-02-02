@@ -10,6 +10,7 @@ import { createComment } from "@/app/space/actions";
 
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface CommentSectionProps {
   postId: string;
@@ -110,34 +111,44 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
     <div className="mt-4 pt-4 border-t border-gray-50 space-y-4">
       {/* Comment List */}
       <div className="space-y-4">
-        {commentList.map((comment) => (
-          <div key={comment.id} className="flex gap-3 group/comment">
-            <div className="flex-1 bg-gray-50 rounded-lg p-3 text-sm relative">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-semibold text-gray-900">{comment.nickname}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">
-                    {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: zhCN })}
-                  </span>
-                  {/* Delete Button - Logic:
-                      1. Show if current user is the Space Owner (Post Author in this context)
-                      2. OR Show if current user is the Comment Author
-                  */}
-                  {currentUser && (isSpaceOwner || currentUser.name === comment.nickname) && (
-                    <button 
-                      onClick={() => handleDeleteComment(comment.id)}
-                      className="opacity-0 group-hover/comment:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1"
-                      title="删除评论"
+        {commentList.map((comment) => {
+          const isGuest = comment.nickname === "访客" || !comment.nickname;
+          
+          return (
+            <div key={comment.id} className="flex gap-3 group/comment">
+              <div className="flex-1 bg-gray-50 rounded-lg p-3 text-sm relative">
+                <div className="flex justify-between items-center mb-1">
+                  {isGuest ? (
+                    <span className="font-semibold text-gray-900">{comment.nickname}</span>
+                  ) : (
+                    <Link 
+                      href={`/space/${encodeURIComponent(comment.nickname)}`}
+                      className="font-semibold text-gray-900 hover:text-blue-600 hover:underline transition-colors"
                     >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                      {comment.nickname}
+                    </Link>
                   )}
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">
+                      {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: zhCN })}
+                    </span>
+                    {currentUser && (isSpaceOwner || currentUser.name === comment.nickname) && (
+                      <button 
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="opacity-0 group-hover/comment:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1"
+                        title="删除评论"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
+                <p className="text-gray-700">{comment.content}</p>
               </div>
-              <p className="text-gray-700">{comment.content}</p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Comment Input */}
