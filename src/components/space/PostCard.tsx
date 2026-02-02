@@ -253,11 +253,6 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
               <MessageSquare className="w-4 h-4" />
               <span className="text-xs font-medium">{post._count?.comments || 0}</span>
             </Button>
-
-            <Button variant="ghost" size="sm" className="gap-1.5 text-gray-500 hover:text-green-500" onClick={handleShare}>
-              <Share2 className="w-4 h-4" />
-              <span className="text-xs font-medium">分享</span>
-            </Button>
           </div>
         </div>
 

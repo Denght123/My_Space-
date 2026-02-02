@@ -29,6 +29,10 @@ model User {
   likes       Like[]   // 用户点赞记录
   posts       Post[]   // 用户发布的文章
   searchHistory SearchHistory[] // 搜索历史
+  
+  // 关注系统
+  followedBy  Follow[] @relation("following") // 谁关注了我 (我的粉丝)
+  following   Follow[] @relation("follower")  // 我关注了谁 (我的关注)
 }
 
 // 2. 站点动态配置表 (保留用于全站公告等，不再存个人信息)
@@ -120,5 +124,19 @@ model SearchHistory {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
-  @@unique([userId, query]) // 确保每个用户对同一个关键词只有一条记录(更新时间即可)
+  @@unique([userId, query]) 
+}
+
+// 8. 关注表 (多对多)
+model Follow {
+  id          String   @id @default(cuid())
+  follower    User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  String
+  
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId String
+
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId]) // 防止重复关注
 }
