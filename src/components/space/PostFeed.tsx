@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
-import PostCard from "./PostCard";
 import CreatePost from "./CreatePost";
+import PostList from "./PostList";
 
 export default async function PostFeed({ userId }: { userId?: string }) {
   const session = await auth();
@@ -25,7 +25,7 @@ export default async function PostFeed({ userId }: { userId?: string }) {
   const posts = await db.post.findMany({
     where: { 
       published: true,
-      authorId: targetUserId // Filter by target user
+      authorId: targetUserId 
     },
     orderBy: { createdAt: "desc" },
     include: {
@@ -57,18 +57,12 @@ export default async function PostFeed({ userId }: { userId?: string }) {
         <CreatePost user={session?.user} authorName={username} avatarUrl={userAvatar} />
       )}
 
-      {/* Feed */}
-      {posts.map((post) => (
-        <PostCard 
-          key={post.id} 
-          post={post} 
-          currentUser={session?.user} 
-          // Prefer nickname, then username, then default
-          authorName={post.author?.nickname || post.author?.username || "匿名用户"} 
-          authorAvatar={post.author?.avatarUrl} // Pass author avatar
-          isOwnProfile={isOwnProfile}
-        />
-      ))}
+      {/* Interactive Post List */}
+      <PostList 
+        initialPosts={posts} 
+        currentUser={session?.user} 
+        isOwnProfile={isOwnProfile} 
+      />
 
       {posts.length === 0 && (
         <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed">

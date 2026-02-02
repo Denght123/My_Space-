@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { Heart, MessageSquare, Share2, MoreHorizontal, Trash2 } from "lucide-react";
+import { Heart, MessageSquare, Share2, MoreHorizontal, Trash2, Edit } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { toggleLike } from "@/app/space/actions";
 import CommentSection from "./CommentSection";
@@ -42,15 +51,19 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
   const [isLiked, setIsLiked] = useState(post.likes?.length > 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  
+  // Delete states
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // Check if current user is the post author
-  // We use authorName comparison as a fallback, but ideally should rely on IDs if available
-  // But simpler: pass a flag from parent (PostFeed)
-  // Let's use the passed isOwnProfile flag OR if post.authorId matches currentUser.id
-  
+  // Edit states
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editContent, setEditContent] = useState(post.content);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Check permissions
   const canDelete = isOwnProfile || (currentUser?.id && post.authorId === currentUser.id);
+  const canEdit = canDelete; // Permission logic is same for edit
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -89,7 +102,10 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
     try {
       const url = `${window.location.origin}/blog/${post.slug}`;
       await navigator.clipboard.writeText(url);
-      toast.success("链接已复制到剪贴板");
+      toast.success("链接已复制到剪贴板", {
+        duration: 1000,
+        style: { background: '#000', color: '#fff', border: 'none' }
+      });
     } catch (err) {
       toast.error("复制失败");
     }
@@ -110,16 +126,38 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
       
       toast.success("已删除", {
         duration: 1000,
-        style: {
-          background: '#000',
-          color: '#fff',
-          border: 'none'
-        }
+        style: { background: '#000', color: '#fff', border: 'none' }
       });
       router.refresh(); 
     } catch (error) {
       toast.error("删除失败");
       setIsDeleting(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editContent.trim()) return;
+    
+    setIsEditing(true);
+    try {
+      const res = await fetch("/api/post/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: post.id, content: editContent }),
+      });
+
+      if (!res.ok) throw new Error("Update failed");
+
+      toast.success("已更新", {
+        duration: 1000,
+        style: { background: '#000', color: '#fff', border: 'none' }
+      });
+      setShowEditDialog(false);
+      router.refresh();
+    } catch (error) {
+      toast.error("更新失败");
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -145,8 +183,8 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
             </div>
           </div>
           
-          {/* Dropdown Menu for Actions - Only show if can delete */}
-          {canDelete && (
+          {/* Dropdown Menu for Actions - Only show if can delete/edit */}
+          {canEdit && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="-mr-2 text-gray-400 h-8 w-8">
@@ -154,6 +192,13 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={() => setShowEditDialog(true)}
+                  className="cursor-pointer"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  编辑
+                </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setShowDeleteDialog(true)}
                   className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
@@ -169,10 +214,8 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
       {/* Content */}
       <div className="space-y-2">
         <div className="block group cursor-default">
-          <h3 className="text-lg font-bold text-gray-900">
-            {post.title}
-          </h3>
-          <div className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+          {/* Title removed, just show content */}
+          <div className="text-gray-600 leading-relaxed whitespace-pre-wrap text-base">
             {post.content}
           </div>
         </div>
@@ -223,7 +266,7 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
             postId={post.id} 
             comments={post.comments || []} 
             currentUser={currentUser}
-            isSpaceOwner={isOwnProfile} // Pass if the viewer owns the space
+            isSpaceOwner={isOwnProfile} 
           />
         )}
       </article>
@@ -248,6 +291,36 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="bg-white rounded-xl sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>编辑文章</DialogTitle>
+            <DialogDescription>
+              修改你的文章内容，完成后点击保存。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea 
+              value={editContent} 
+              onChange={(e) => setEditContent(e.target.value)}
+              className="min-h-[300px] resize-none text-base"
+              placeholder="文章内容..."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} disabled={isEditing}>取消</Button>
+            <Button 
+              onClick={handleUpdate} 
+              className="bg-black text-white hover:bg-gray-800"
+              disabled={isEditing || !editContent.trim()}
+            >
+              {isEditing ? "保存中..." : "保存修改"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -48,8 +48,15 @@ export default function LoginForm() {
       const result = await login(formData);
 
       if (result?.error) {
-        form.setError("root", { message: result.error });
-        toast.error(result.error);
+        // form.setError("root", { message: result.error }); // Optional: keep form error if you want text below input
+        toast.error(result.error, {
+          duration: 1500,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: 'none'
+          }
+        });
       } else {
         toast.success("登录成功", {
           duration: 1000,
