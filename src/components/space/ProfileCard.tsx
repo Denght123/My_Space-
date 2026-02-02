@@ -68,10 +68,10 @@ export default async function ProfileCard({ userId }: { userId?: string }) {
               <Edit className="w-4 h-4" />
             </Link>
           )}
-          <Avatar className="w-24 h-24 mx-auto border-4 border-white shadow-md">
-            <AvatarImage src={avatarUrl} />
-            <AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
+        <Avatar className="w-24 h-24 mx-auto border-4 border-white shadow-md">
+          <AvatarImage src={avatarUrl} />
+          <AvatarFallback>User</AvatarFallback>
+        </Avatar>
           <div>
             <h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
             <p className="text-sm text-gray-500 mt-1">{slogan}</p>

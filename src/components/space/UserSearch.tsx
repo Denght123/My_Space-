@@ -53,7 +53,8 @@ export default function UserSearch() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q }),
       });
-      fetchHistory(); // Refresh
+      // Refresh history list immediately to show the new item next time
+      fetchHistory(); 
     } catch (e) {
       // Ignore
     }
@@ -105,8 +106,8 @@ export default function UserSearch() {
   };
 
   return (
-    <div className="flex items-center gap-2 relative" ref={wrapperRef}>
-      <div className="relative w-full max-w-xs">
+    <div className="flex items-center gap-2 relative w-full" ref={wrapperRef}>
+      <div className="relative w-full">
         <form onSubmit={handleSearch} className="relative w-full flex items-center">
           <Input
             type="text"
@@ -117,7 +118,7 @@ export default function UserSearch() {
               if(errorMsg) setErrorMsg("");
             }}
             onFocus={() => setShowHistory(true)}
-            className="pl-3 pr-10 h-9 bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-full text-sm w-full"
+            className="pl-3 pr-10 h-9 bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-full text-sm w-full min-w-[120px]" 
             disabled={isSearching}
           />
           <button 

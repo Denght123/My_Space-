@@ -26,9 +26,9 @@ export default async function RootLayout({
       <body className={`${inter.className} bg-white text-black antialiased cursor-default`}>
         <div className="min-h-screen flex flex-col">
           <header className="fixed top-0 w-full bg-white z-50 border-b border-gray-100">
-            <div className="container mx-auto px-6 h-16 flex justify-between items-center gap-4">
-              <div className="flex items-center gap-4 shrink-0">
-                <h1 className="text-xl font-bold tracking-tight">
+            <div className="container mx-auto px-4 h-16 flex justify-between items-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight">
                   <Link href={session ? "/space" : "/"} className="hover:opacity-70 transition-opacity cursor-pointer">MySpace</Link>
                 </h1>
                 
@@ -36,16 +36,22 @@ export default async function RootLayout({
                 {session?.user?.id && <BackToMySpace currentUserId={session.user.id} />}
               </div>
               
-              {/* Search Bar - Center/Right aligned */}
+              {/* Search Bar - Flexible width */}
               {session && (
-                <div className="flex-1 max-w-md mx-4 hidden sm:block">
+                <div className="flex-1 mx-2 w-full sm:max-w-md min-w-0">
                   <UserSearch />
                 </div>
               )}
 
-              <nav className="shrink-0 flex items-center gap-4">
-                {/* Mobile Search Icon could go here */}
-                {!session && (
+              <nav className="shrink-0 flex items-center gap-2 sm:gap-4">
+                {session ? (
+                  <Link 
+                    href="/space/MySpace官方"
+                    className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium bg-gray-100 text-gray-900 rounded-full hover:bg-gray-200 hover:scale-110 transition-all duration-300 whitespace-nowrap"
+                  >
+                    联系我们
+                  </Link>
+                ) : (
                   <Link 
                     href="/login" 
                     className="text-sm font-medium hover:text-gray-500 transition-colors cursor-pointer"

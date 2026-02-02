@@ -62,20 +62,29 @@ export default function RegisterForm() {
         throw new Error(result.error || "注册失败");
       }
 
-      toast.success("注册成功！正在跳转登录页...", {
+      toast.success("注册成功！正在跳转...", {
         duration: 2000,
         position: "top-center",
+        style: {
+          background: '#000',
+          color: '#fff',
+          border: 'none'
+        }
       });
 
       setTimeout(() => {
         router.push("/login");
       }, 2000);
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("发生未知错误");
-      }
+      const errorMsg = error instanceof Error ? error.message : "发生未知错误";
+      toast.error(errorMsg, {
+        duration: 2000,
+        style: {
+          background: '#000',
+          color: '#fff',
+          border: 'none'
+        }
+      });
     } finally {
       setIsLoading(false);
     }
