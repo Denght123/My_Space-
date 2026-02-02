@@ -52,14 +52,19 @@ export default function LoginForm() {
         toast.error(result.error);
       } else {
         toast.success("登录成功", {
-          duration: 2000,
+          duration: 1000,
           position: "top-center",
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: 'none'
+          }
         });
 
         setTimeout(() => {
           // Force reload to update session state
           window.location.href = "/space";
-        }, 2000);
+        }, 1000);
       }
     } catch (error) {
       toast.error("登录发生错误，请重试");

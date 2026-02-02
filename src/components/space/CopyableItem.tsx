@@ -14,7 +14,14 @@ export default function CopyableItem({ icon, value, label }: CopyableItemProps) 
 
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
-    toast.success(`${label}已复制`);
+    toast.success(`${label}已复制`, {
+      duration: 1000,
+      style: {
+        background: '#000',
+        color: '#fff',
+        border: 'none'
+      }
+    });
   };
 
   const Icon = icon === "github" ? Github : Mail;

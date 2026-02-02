@@ -38,7 +38,14 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
 
       if (!res.ok) throw new Error("Delete failed");
       
-      toast.success("评论已删除");
+      toast.success("评论已删除", {
+        duration: 1000,
+        style: {
+          background: '#000',
+          color: '#fff',
+          border: 'none'
+        }
+      });
       // Optimistically remove from list
       setCommentList(prev => prev.filter(c => c.id !== commentId));
       router.refresh();
@@ -77,7 +84,14 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("评论已提交");
+        toast.success("评论已提交", {
+          duration: 1000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: 'none'
+          }
+        });
         setContent("");
         
         // Optimistically add the new comment to the list

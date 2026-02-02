@@ -42,7 +42,14 @@ export default function EditProfileForm({ config, social }: { config: any, socia
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("保存成功", { duration: 2000 });
+        toast.success("保存成功", { 
+          duration: 1000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: 'none'
+          }
+        });
       }
     } catch (error) {
       toast.error("保存失败，请重试");

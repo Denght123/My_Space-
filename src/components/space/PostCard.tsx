@@ -108,7 +108,14 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
 
       if (!res.ok) throw new Error("Delete failed");
       
-      toast.success("已删除");
+      toast.success("已删除", {
+        duration: 1000,
+        style: {
+          background: '#000',
+          color: '#fff',
+          border: 'none'
+        }
+      });
       router.refresh(); 
     } catch (error) {
       toast.error("删除失败");

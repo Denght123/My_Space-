@@ -105,7 +105,14 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("发布成功！");
+        toast.success("发布成功！", {
+          duration: 1000,
+          style: {
+            background: '#000',
+            color: '#fff',
+            border: 'none'
+          }
+        });
         setContent("");
       }
     } catch (error) {
