@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { auth } from "@/auth";
 import UserSearch from "@/components/space/UserSearch";
 import BackToMySpace from "@/components/space/BackToMySpace";
+import NotificationDropdown from "@/components/space/NotificationDropdown";
 import "./globals.css";
 import Link from 'next/link';
 
@@ -44,6 +45,9 @@ export default async function RootLayout({
               )}
 
               <nav className="shrink-0 flex items-center gap-2 sm:gap-4">
+                {/* Notification Bell - Only for logged in users */}
+                {session && <NotificationDropdown />}
+
                 {session ? (
                   <Link 
                     href="/space/MySpace官方"

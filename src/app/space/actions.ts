@@ -40,6 +40,7 @@ export async function createPost(formData: FormData) {
 }
 
 export async function createComment(formData: FormData) {
+  const session = await auth();
   const postId = formData.get("postId") as string;
   const content = formData.get("content") as string;
   const nickname = formData.get("nickname") as string || "访客";
@@ -54,9 +55,34 @@ export async function createComment(formData: FormData) {
         postId,
         content,
         nickname,
-        isApproved: true, // Auto-approve for now in Space
+        isApproved: true, 
       }
     });
+
+    // Notification Logic
+    // 1. Get post author
+    const post = await db.post.findUnique({
+      where: { id: postId },
+      select: { authorId: true }
+    });
+
+    // 2. Create notification if author exists and is not the commenter
+    if (post?.authorId) {
+      // Check if commenter is the author (prevent self-notification)
+      const isSelf = session?.user?.id === post.authorId;
+
+      if (!isSelf) {
+        await db.notification.create({
+          data: {
+            userId: post.authorId, // Notify post author
+            actorId: session?.user?.id, // Triggered by current user (if logged in)
+            type: "COMMENT",
+            postId: postId,
+            commentId: newComment.id,
+          }
+        });
+      }
+    }
 
     revalidatePath("/space");
     return { success: true, comment: newComment };

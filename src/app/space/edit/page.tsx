@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditProfileForm from "@/components/space/EditProfileForm";
+import PasswordChangeDialog from "@/components/space/PasswordChangeDialog";
 
 export default async function EditProfilePage() {
   const session = await auth();
@@ -33,15 +34,21 @@ export default async function EditProfilePage() {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-3xl">
         {/* Header with Back Button */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/space">
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-white">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">编辑资料</h1>
-            <p className="text-sm text-gray-500">管理你的个人信息和展示内容</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/space">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-white">
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">编辑资料</h1>
+              <p className="text-sm text-gray-500">管理你的个人信息和展示内容</p>
+            </div>
+          </div>
+          
+          <div className="flex-shrink-0">
+            <PasswordChangeDialog />
           </div>
         </div>
 

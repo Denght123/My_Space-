@@ -33,6 +33,10 @@ model User {
   // 关注系统
   followedBy  Follow[] @relation("following") // 谁关注了我 (我的粉丝)
   following   Follow[] @relation("follower")  // 我关注了谁 (我的关注)
+
+  // 通知系统
+  notifications Notification[] @relation("user") // 收到的通知
+  actions       Notification[] @relation("actor") // 发出的动作(产生的通知)
 }
 
 // 2. 站点动态配置表 (保留用于全站公告等，不再存个人信息)
@@ -67,6 +71,7 @@ model Post {
   authorId    String?   // 暂时可选，兼容旧数据
   
   attachments Attachment[] // 关联附件
+  notifications Notification[] // 关联通知
 }
 
 // 6. 附件表
@@ -99,6 +104,8 @@ model Comment {
   parentId  String?
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentReplies")
+
+  notifications Notification[] // 关联通知
 }
 
 // 5. 点赞表
@@ -139,4 +146,27 @@ model Follow {
   createdAt   DateTime @default(now())
 
   @@unique([followerId, followingId]) // 防止重复关注
+}
+
+// 9. 通知表 (新增)
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // COMMENT, LIKE, FOLLOW
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // 接收者
+  user      User     @relation("user", fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  // 触发者 (actor)
+  actor     User?    @relation("actor", fields: [actorId], references: [id])
+  actorId   String?  // 可选，如果是访客评论则无 actor
+
+  // 关联实体
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String?
+
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String?
 }

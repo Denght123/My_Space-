@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { Heart, MessageSquare, Share2, MoreHorizontal, Trash2, Edit } from "lucide-react";
+import { Heart, MessageSquare, MoreHorizontal, Trash2, Edit } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,7 @@ interface PostCardProps {
   currentUser?: any;
   authorName?: string; 
   authorAvatar?: string | null;
-  isOwnProfile?: boolean; // New prop to indicate if viewing own profile
+  isOwnProfile?: boolean; 
 }
 
 export default function PostCard({ post, currentUser, authorName = "博主", authorAvatar, isOwnProfile = false }: PostCardProps) {
@@ -63,7 +63,7 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
 
   // Check permissions
   const canDelete = isOwnProfile || (currentUser?.id && post.authorId === currentUser.id);
-  const canEdit = canDelete; // Permission logic is same for edit
+  const canEdit = canDelete; 
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -71,7 +71,6 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
       return;
     }
     
-    // Optimistic update
     const previousLikes = likes;
     const previousIsLiked = isLiked;
     
@@ -83,31 +82,11 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
       const result = await toggleLike(post.id);
       if (result.error) throw new Error(result.error);
     } catch (error) {
-      // Revert on error
       setLikes(previousLikes);
       setIsLiked(previousIsLiked);
       toast.error("操作失败，请重试");
     } finally {
       setIsLikeLoading(false);
-    }
-  };
-
-  const handleShare = async () => {
-    // Copy link to clipboard safely
-    if (typeof window === 'undefined' || !navigator?.clipboard) {
-      toast.error("无法访问剪贴板");
-      return;
-    }
-
-    try {
-      const url = `${window.location.origin}/blog/${post.slug}`;
-      await navigator.clipboard.writeText(url);
-      toast.success("链接已复制到剪贴板", {
-        duration: 1000,
-        style: { background: '#000', color: '#fff', border: 'none' }
-      });
-    } catch (err) {
-      toast.error("复制失败");
     }
   };
 
@@ -162,7 +141,7 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
   };
 
   if (isDeleting) {
-    return null; // Optimistically hide
+    return null;
   }
 
   return (
@@ -211,16 +190,15 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
           )}
         </div>
 
-      {/* Content */}
-      <div className="space-y-2">
-        <div className="block group cursor-default">
-          {/* Title removed, just show content */}
-          <div className="text-gray-600 leading-relaxed whitespace-pre-wrap text-base">
-            {post.content}
+        {/* Content */}
+        <div className="space-y-2">
+          <div className="block group cursor-default">
+            <div className="text-gray-600 leading-relaxed whitespace-pre-wrap text-base">
+              {post.content}
+            </div>
           </div>
-        </div>
-        
-        {/* Tags */}
+          
+          {/* Tags */}
           {post.tags && (
             <div className="flex gap-2 pt-2">
               <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
@@ -265,6 +243,11 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
           />
         )}
       </article>
+
+      {/* Anchor for notification jump */}
+      <div id={`post-${post.id}`} className="scroll-mt-24" />
+      {/* Also add anchor for comments section if expanded */}
+      <div id={`comments-${post.id}`} className="scroll-mt-24" />
 
       {/* Custom Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
