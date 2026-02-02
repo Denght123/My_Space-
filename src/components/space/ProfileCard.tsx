@@ -1,10 +1,11 @@
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Github, Mail, MapPin, Link as LinkIcon, LogOut, Edit } from "lucide-react";
+import { MapPin, LogOut, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/space/actions";
 import Link from "next/link";
+import CopyableItem from "./CopyableItem";
 
 export default async function ProfileCard({ userId }: { userId?: string }) {
   const session = await auth();
@@ -22,12 +23,23 @@ export default async function ProfileCard({ userId }: { userId?: string }) {
   // Determine if this is the current user's own profile
   const isOwnProfile = session?.user?.id === targetUserId;
   
-  const social = user?.socialLinks ? JSON.parse(user.socialLinks) : { github: "#", email: "mailto:example@com" };
+  const social = user?.socialLinks ? JSON.parse(user.socialLinks) : { github: "", email: "" };
   
   const displayName = user?.nickname || user?.username || "未登录";
   const avatarUrl = user?.avatarUrl || "https://github.com/shadcn.png";
-  const slogan = user?.slogan || "全栈开发者";
+  const slogan = user?.slogan || "请写入你的个性签名...";
   const location = user?.location || "中国 上海";
+
+  // Fetch aggregated stats for the user
+  const [postCount, likeCount] = await Promise.all([
+    db.post.count({ where: { authorId: targetUserId } }),
+    db.post.aggregate({
+      where: { authorId: targetUserId },
+      _sum: { likeCount: true }
+    })
+  ]);
+
+  const totalLikes = likeCount._sum.likeCount || 0;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border p-6 space-y-6 md:sticky md:top-24">
@@ -48,18 +60,18 @@ export default async function ProfileCard({ userId }: { userId?: string }) {
         </div>
       </div>
 
-      {/* Stats - Initialize to 0 */}
+      {/* Stats - Dynamic */}
       <div className="grid grid-cols-3 gap-2 text-center py-4 border-y border-gray-100">
         <div>
-          <div className="font-bold text-gray-900">0</div>
+          <div className="font-bold text-gray-900">{postCount}</div>
           <div className="text-xs text-gray-500">文章</div>
         </div>
         <div>
-          <div className="font-bold text-gray-900">0</div>
+          <div className="font-bold text-gray-900">{totalLikes}</div>
           <div className="text-xs text-gray-500">获赞</div>
         </div>
         <div>
-          <div className="font-bold text-gray-900">0</div>
+          <div className="font-bold text-gray-900">-</div> 
           <div className="text-xs text-gray-500">访问</div>
         </div>
       </div>
@@ -79,6 +91,10 @@ export default async function ProfileCard({ userId }: { userId?: string }) {
             <MapPin className="w-4 h-4 text-gray-400" />
             <span>{location}</span>
           </div>
+          
+          {/* Social Links */}
+          <CopyableItem icon="github" value={social.github} label="GitHub地址" />
+          <CopyableItem icon="email" value={social.email} label="邮箱地址" />
         </div>
 
         {/* Logout Button - Only show on own profile */}

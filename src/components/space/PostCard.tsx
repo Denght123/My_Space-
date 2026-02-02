@@ -33,9 +33,10 @@ interface PostCardProps {
   currentUser?: any;
   authorName?: string; 
   authorAvatar?: string | null;
+  isOwnProfile?: boolean; // New prop to indicate if viewing own profile
 }
 
-export default function PostCard({ post, currentUser, authorName = "博主", authorAvatar }: PostCardProps) {
+export default function PostCard({ post, currentUser, authorName = "博主", authorAvatar, isOwnProfile = false }: PostCardProps) {
   const router = useRouter();
   const [likes, setLikes] = useState(post.likeCount || 0);
   const [isLiked, setIsLiked] = useState(post.likes?.length > 0);
@@ -43,6 +44,13 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
   const [showComments, setShowComments] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Check if current user is the post author
+  // We use authorName comparison as a fallback, but ideally should rely on IDs if available
+  // But simpler: pass a flag from parent (PostFeed)
+  // Let's use the passed isOwnProfile flag OR if post.authorId matches currentUser.id
+  
+  const canDelete = isOwnProfile || (currentUser?.id && post.authorId === currentUser.id);
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -130,23 +138,25 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
             </div>
           </div>
           
-          {/* Dropdown Menu for Actions */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="-mr-2 text-gray-400 h-8 w-8">
-                <MoreHorizontal className="w-5 h-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem 
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                删除
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Dropdown Menu for Actions - Only show if can delete */}
+          {canDelete && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="-mr-2 text-gray-400 h-8 w-8">
+                  <MoreHorizontal className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  删除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
       {/* Content */}
@@ -206,6 +216,7 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
             postId={post.id} 
             comments={post.comments || []} 
             currentUser={currentUser}
+            isSpaceOwner={isOwnProfile} // Pass if the viewer owns the space
           />
         )}
       </article>

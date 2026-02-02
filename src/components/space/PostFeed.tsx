@@ -66,6 +66,7 @@ export default async function PostFeed({ userId }: { userId?: string }) {
           // Prefer nickname, then username, then default
           authorName={post.author?.nickname || post.author?.username || "匿名用户"} 
           authorAvatar={post.author?.avatarUrl} // Pass author avatar
+          isOwnProfile={isOwnProfile}
         />
       ))}
 

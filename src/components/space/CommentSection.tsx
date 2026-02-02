@@ -8,16 +8,44 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createComment } from "@/app/space/actions";
 
+import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 interface CommentSectionProps {
   postId: string;
   comments: any[];
   currentUser?: any;
+  isSpaceOwner?: boolean; // New prop to control deletion permission
 }
 
-export default function CommentSection({ postId, comments, currentUser }: CommentSectionProps) {
+export default function CommentSection({ postId, comments, currentUser, isSpaceOwner = false }: CommentSectionProps) {
   const [commentList, setCommentList] = useState(comments);
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+
+  const handleDeleteComment = async (commentId: string) => {
+    // Only allow deletion if user is the space owner OR if they are the comment author
+    // But for simplicity/moderation, let's strictly check permissions before showing button.
+    if (!confirm("确定要删除这条评论吗？")) return;
+
+    try {
+      const res = await fetch("/api/comment/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId }),
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
+      
+      toast.success("评论已删除");
+      // Optimistically remove from list
+      setCommentList(prev => prev.filter(c => c.id !== commentId));
+      router.refresh();
+    } catch (error) {
+      toast.error("删除失败");
+    }
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,10 +79,11 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
       } else {
         toast.success("评论已提交");
         setContent("");
-        // Optimistically add comment (or just wait for revalidate)
-        // Since we revalidatePath in action, the page should refresh data. 
-        // But for smooth UX, we could append it here.
-        // For now, let's rely on server revalidation.
+        
+        // Optimistically add the new comment to the list
+        if (result.comment) {
+          setCommentList(prev => [result.comment, ...prev]);
+        }
       }
     } catch (error) {
       toast.error("提交失败");
@@ -68,13 +97,28 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
       {/* Comment List */}
       <div className="space-y-4">
         {commentList.map((comment) => (
-          <div key={comment.id} className="flex gap-3">
-            <div className="flex-1 bg-gray-50 rounded-lg p-3 text-sm">
+          <div key={comment.id} className="flex gap-3 group/comment">
+            <div className="flex-1 bg-gray-50 rounded-lg p-3 text-sm relative">
               <div className="flex justify-between items-center mb-1">
                 <span className="font-semibold text-gray-900">{comment.nickname}</span>
-                <span className="text-xs text-gray-400">
-                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: zhCN })}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">
+                    {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: zhCN })}
+                  </span>
+                  {/* Delete Button - Logic:
+                      1. Show if current user is the Space Owner (Post Author in this context)
+                      2. OR Show if current user is the Comment Author
+                  */}
+                  {currentUser && (isSpaceOwner || currentUser.name === comment.nickname) && (
+                    <button 
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="opacity-0 group-hover/comment:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1"
+                      title="删除评论"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="text-gray-700">{comment.content}</p>
             </div>

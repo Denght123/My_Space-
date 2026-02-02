@@ -123,7 +123,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
             ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="分享你的新鲜事... (支持 Markdown)"
+            placeholder="分享你的新鲜事..."
             className="w-full bg-transparent px-2 py-2 text-sm focus:outline-none resize-none overflow-hidden placeholder:text-gray-400 min-h-[44px]"
             disabled={isSubmitting}
             rows={1}

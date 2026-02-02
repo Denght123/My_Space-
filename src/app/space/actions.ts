@@ -49,7 +49,7 @@ export async function createComment(formData: FormData) {
   }
 
   try {
-    await db.comment.create({
+    const newComment = await db.comment.create({
       data: {
         postId,
         content,
@@ -59,7 +59,7 @@ export async function createComment(formData: FormData) {
     });
 
     revalidatePath("/space");
-    return { success: true };
+    return { success: true, comment: newComment };
   } catch (error) {
     console.error("Comment error:", error);
     return { error: "评论失败" };

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Toaster } from 'sonner';
 import { auth } from "@/auth";
 import UserSearch from "@/components/space/UserSearch";
+import BackToMySpace from "@/components/space/BackToMySpace";
 import "./globals.css";
 import Link from 'next/link';
 
@@ -26,9 +27,14 @@ export default async function RootLayout({
         <div className="min-h-screen flex flex-col">
           <header className="fixed top-0 w-full bg-white z-50 border-b border-gray-100">
             <div className="container mx-auto px-6 h-16 flex justify-between items-center gap-4">
-              <h1 className="text-xl font-bold tracking-tight shrink-0">
-                <Link href={session ? "/space" : "/"} className="hover:opacity-70 transition-opacity cursor-pointer">MySpace</Link>
-              </h1>
+              <div className="flex items-center gap-4 shrink-0">
+                <h1 className="text-xl font-bold tracking-tight">
+                  <Link href={session ? "/space" : "/"} className="hover:opacity-70 transition-opacity cursor-pointer">MySpace</Link>
+                </h1>
+                
+                {/* "Back to My Space" Button - Only for logged in users */}
+                {session?.user?.id && <BackToMySpace currentUserId={session.user.id} />}
+              </div>
               
               {/* Search Bar - Center/Right aligned */}
               {session && (
