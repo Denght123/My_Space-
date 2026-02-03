@@ -1,9 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { db } from "@/lib/db";
+import { put } from "@vercel/blob";
 
 export async function uploadFile(formData: FormData) {
   const session = await auth();
@@ -17,23 +15,15 @@ export async function uploadFile(formData: FormData) {
   }
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    // Create unique filename
-    const filename = `upload-${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(file.name)}`;
-    
-    // Ensure upload dir exists
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-    await mkdir(uploadDir, { recursive: true });
-    
-    await writeFile(path.join(uploadDir, filename), buffer);
-    const url = `/uploads/${filename}`;
+    // Upload to Vercel Blob
+    const blob = await put(file.name, file, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN, // Ensure this env var is set
+    });
 
-    // Optional: Record in DB immediately or wait for post creation
-    // For now, we return the URL for frontend preview/insertion
-    
-    return { success: true, url, filename, type: file.type };
+    return { success: true, url: blob.url, filename: file.name, type: file.type };
   } catch (error) {
     console.error("Upload error:", error);
-    return { error: "Upload failed" };
+    return { error: "Upload failed: " + (error as Error).message };
   }
 }
