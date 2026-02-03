@@ -78,6 +78,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
         
         if (file.type.startsWith("image/")) {
           // Insert image node directly
+          // @ts-ignore - TipTap types issue
           editor?.chain().focus().setImage({ src: res.url }).run();
         } else {
           // For non-image files, insert a link

@@ -1,37 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Seeding database...');
-  // 1. Create default admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10)
-  
-  const user = await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {},
-    create: {
-      username: 'admin',
-      password: hashedPassword,
-      nickname: 'Admin User',
-      slogan: 'Welcome to my minimal blog',
-      aboutMe: '# About Me\n\nThis is the default about page.',
-    },
-  })
-
-  console.log({ user })
-
-  // 2. Create default site config
-  const siteConfig = await prisma.siteConfig.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      siteName: 'MySpace',
-    },
-  })
-
-  console.log({ siteConfig })
+  console.log('Seed script is disabled for production build.')
 }
 
 main()
