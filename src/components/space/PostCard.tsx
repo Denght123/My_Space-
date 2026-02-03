@@ -207,15 +207,17 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
           )}
         </div>
 
-        {/* Content */}
-        <div className="space-y-2">
-          <div className="block group cursor-default">
-            <div className="text-gray-600 leading-relaxed whitespace-pre-wrap text-base">
-              {post.content}
-            </div>
-          </div>
-          
-          {/* Tags */}
+      {/* Content */}
+      <div className="space-y-2">
+        <div className="block group cursor-default">
+          {/* Use dangerouslySetInnerHTML to render HTML content from TipTap */}
+          <div 
+            className="text-gray-600 leading-relaxed text-base prose prose-sm max-w-none [&>p]:mb-2 [&>img]:rounded-lg"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </div>
+        
+        {/* Tags */}
           {post.tags && (
             <div className="flex gap-2 pt-2">
               <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">

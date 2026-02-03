@@ -11,6 +11,16 @@ import { createComment } from "@/app/space/actions";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CommentSectionProps {
   postId: string;
@@ -23,18 +33,17 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
   const [commentList, setCommentList] = useState(comments);
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleDeleteComment = async (commentId: string) => {
-    // Only allow deletion if user is the space owner OR if they are the comment author
-    // But for simplicity/moderation, let's strictly check permissions before showing button.
-    if (!confirm("确定要删除这条评论吗？")) return;
-
+  const confirmDeleteComment = async () => {
+    if (!deleteId) return;
+    
     try {
       const res = await fetch("/api/comment/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ commentId }),
+        body: JSON.stringify({ commentId: deleteId }),
       });
 
       if (!res.ok) throw new Error("Delete failed");
@@ -48,10 +57,12 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
         }
       });
       // Optimistically remove from list
-      setCommentList(prev => prev.filter(c => c.id !== commentId));
+      setCommentList(prev => prev.filter(c => c.id !== deleteId));
       router.refresh();
     } catch (error) {
       toast.error("删除失败");
+    } finally {
+      setDeleteId(null);
     }
   };
 
@@ -139,7 +150,7 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
                     </span>
                     {currentUser && (isSpaceOwner || currentUser.name === comment.nickname) && (
                       <button 
-                        onClick={() => handleDeleteComment(comment.id)}
+                        onClick={() => setDeleteId(comment.id)}
                         className="opacity-0 group-hover/comment:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1"
                         title="删除评论"
                       >
@@ -154,6 +165,27 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
           );
         })}
       </div>
+
+      {/* Custom Delete Comment Dialog */}
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent className="bg-white border-black border-2 rounded-xl shadow-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-black">确认删除？</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-500">
+              确定要删除这条评论吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-0 hover:bg-gray-100 rounded-lg">取消</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteComment}
+              className="bg-black text-white hover:bg-gray-800 rounded-lg"
+            >
+              确认删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Comment Input */}
       <form onSubmit={handleSubmit} className="flex gap-3">
