@@ -13,6 +13,9 @@ async function main() {
     create: {
       username: 'admin',
       password: hashedPassword,
+      nickname: 'Admin User',
+      slogan: 'Welcome to my minimal blog',
+      aboutMe: '# About Me\n\nThis is the default about page.',
     },
   })
 
@@ -23,9 +26,7 @@ async function main() {
     where: { id: 1 },
     update: {},
     create: {
-      nickname: 'Admin User',
-      slogan: 'Welcome to my minimal blog',
-      aboutMe: '# About Me\n\nThis is the default about page.',
+      siteName: 'MySpace',
     },
   })
 
