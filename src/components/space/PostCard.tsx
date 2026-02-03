@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
@@ -52,6 +52,23 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
   
+  // Auto-expand comments if URL hash matches a comment in this post
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.substring(1); // remove #
+      
+      // Check if hash matches any comment ID in this post
+      if (post.comments?.some((c: any) => `comment-${c.id}` === hash)) {
+        setShowComments(true);
+        // Wait for expansion animation/render, then scroll
+        setTimeout(() => {
+          const el = document.getElementById(hash);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+  }, []); // Run once on mount
+
   // Delete states
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -235,19 +252,19 @@ export default function PostCard({ post, currentUser, authorName = "博主", aut
         </div>
 
         {showComments && (
-          <CommentSection 
-            postId={post.id} 
-            comments={post.comments || []} 
-            currentUser={currentUser}
-            isSpaceOwner={isOwnProfile} 
-          />
+          <div id={`comments-section-${post.id}`}>
+            <CommentSection 
+              postId={post.id} 
+              comments={post.comments || []} 
+              currentUser={currentUser}
+              isSpaceOwner={isOwnProfile} 
+            />
+          </div>
         )}
       </article>
 
-      {/* Anchor for notification jump */}
+      {/* Anchor for notification jump - Positioned slightly above for better view */}
       <div id={`post-${post.id}`} className="scroll-mt-24" />
-      {/* Also add anchor for comments section if expanded */}
-      <div id={`comments-${post.id}`} className="scroll-mt-24" />
 
       {/* Custom Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

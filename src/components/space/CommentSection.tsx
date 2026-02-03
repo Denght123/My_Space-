@@ -115,7 +115,11 @@ export default function CommentSection({ postId, comments, currentUser, isSpaceO
           const isGuest = comment.nickname === "访客" || !comment.nickname;
           
           return (
-            <div key={comment.id} className="flex gap-3 group/comment">
+            <div 
+              key={comment.id} 
+              id={`comment-${comment.id}`} // Anchor for notification jump
+              className="flex gap-3 group/comment scroll-mt-24"
+            >
               <div className="flex-1 bg-gray-50 rounded-lg p-3 text-sm relative">
                 <div className="flex justify-between items-center mb-1">
                   {isGuest ? (

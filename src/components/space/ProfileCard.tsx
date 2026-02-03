@@ -8,6 +8,7 @@ import Link from "next/link";
 import CopyableItem from "./CopyableItem";
 import FollowStats from "./sidebar/FollowStats";
 import FollowButton from "./FollowButton";
+import LogoutButton from "./LogoutButton";
 
 export default async function ProfileCard({ userId }: { userId?: string }) {
   const session = await auth();
@@ -116,14 +117,9 @@ export default async function ProfileCard({ userId }: { userId?: string }) {
             <CopyableItem icon="email" value={social.email} label="邮箱地址" />
           </div>
 
-          {/* Logout Button - Only show on own profile */}
+          {/* Logout Button */}
           {isOwnProfile && (
-            <form action={logout}>
-              <Button variant="outline" className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 border-red-100 gap-2">
-                <LogOut className="w-4 h-4" />
-                退出登录
-              </Button>
-            </form>
+            <LogoutButton />
           )}
         </div>
       </div>

@@ -24,7 +24,10 @@ export async function GET(
       orderBy: { createdAt: "desc" }
     });
 
-    const followingUsers = following.map(f => f.following);
+    // Simple filter: Just remove the user themselves if they appear (which shouldn't happen usually)
+    const followingUsers = following
+      .map(f => f.following)
+      .filter(u => u.id !== userId);
 
     return NextResponse.json({ following: followingUsers });
   } catch (error) {
