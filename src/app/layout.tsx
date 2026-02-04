@@ -8,6 +8,8 @@ import NotificationDropdown from "@/components/space/NotificationDropdown";
 import "./globals.css";
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic'; // Force dynamic rendering to prevent session caching issues
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

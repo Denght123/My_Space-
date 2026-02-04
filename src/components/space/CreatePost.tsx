@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { createPost } from "@/app/space/actions";
 import { uploadFile } from "@/app/space/upload-action";
@@ -12,10 +12,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Image as ImageIcon, 
   Send, 
-  Paperclip, 
   Code, 
-  Smile,
-  X,
   Bold,
   Italic
 } from "lucide-react";
@@ -29,7 +26,12 @@ import {
 export default function CreatePost({ user, authorName, avatarUrl }: { user: any, authorName: string, avatarUrl?: string | null }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -49,9 +51,6 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
       },
     },
     immediatelyRender: false,
-    onUpdate: ({ editor }) => {
-      // Optional: Logic on update
-    }
   });
 
   const handleImageClick = () => {
@@ -81,11 +80,9 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
         });
         
         if (file.type.startsWith("image/")) {
-          // Insert image node directly
-          // @ts-ignore - TipTap types issue
+          // @ts-ignore
           editor?.chain().focus().setImage({ src: res.url }).run();
         } else {
-          // For non-image files, insert a link
           const link = `<a href="${res.url}" target="_blank">📎 ${file.name}</a>`;
           editor?.chain().focus().insertContent(link).run();
         }
@@ -102,7 +99,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
     editor?.chain().focus().toggleCodeBlock().run();
   };
 
-  // Helper to check if editor has meaningful content
+  // Check if content is valid (not empty or has image)
   const hasContent = editor && (!editor.isEmpty || editor.getHTML().includes('<img'));
 
   async function handleSubmit(e: React.FormEvent) {
@@ -111,8 +108,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
 
     setIsSubmitting(true);
     try {
-      // Get HTML content to preserve images
-      const content = editor.getHTML();
+      const content = editor?.getHTML() || "";
       
       const formData = new FormData();
       formData.append("content", content);
@@ -125,7 +121,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
           duration: 1000,
           style: { background: '#000', color: '#fff', border: 'none' }
         });
-        editor.commands.clearContent();
+        editor?.commands.clearContent();
       }
     } catch (error) {
       toast.error("发布失败，请重试");
@@ -134,16 +130,25 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
     }
   }
 
-  if (!editor) {
-    return null;
+  // SSR Skeleton
+  if (!isMounted) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border p-4 mb-6">
+        <div className="h-[44px] bg-gray-50 rounded-lg w-full mb-3 animate-pulse"></div>
+        <div className="flex justify-between border-t border-gray-50 pt-2">
+           <div className="flex gap-1"><div className="w-8 h-8 bg-gray-100 rounded-md"></div></div>
+           <div className="w-20 h-8 bg-gray-100 rounded-full"></div>
+        </div>
+      </div>
+    );
   }
+
+  if (!editor) return null;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border p-4 mb-6">
       <div className="relative mb-3">
         <EditorContent editor={editor} className="min-h-[44px]" />
-        
-        {/* Placeholder removed, using extension instead */}
         
         {isUploading && (
           <div className="absolute right-2 bottom-2">
