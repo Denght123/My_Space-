@@ -102,9 +102,12 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
     editor?.chain().focus().toggleCodeBlock().run();
   };
 
+  // Helper to check if editor has meaningful content
+  const hasContent = editor && (!editor.isEmpty || editor.getHTML().includes('<img'));
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!editor || editor.isEmpty) return;
+    if (!hasContent) return;
 
     setIsSubmitting(true);
     try {
@@ -213,7 +216,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
           onClick={handleSubmit} 
           size="sm" 
           className="bg-black hover:bg-gray-800 text-white gap-2 rounded-full px-6 transition-all"
-          disabled={editor.isEmpty || isSubmitting || isUploading}
+          disabled={!hasContent || isSubmitting || isUploading}
         >
           <Send className="w-3 h-3" />
           {isSubmitting ? "发布中..." : "发布"}

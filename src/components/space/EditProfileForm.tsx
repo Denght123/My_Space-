@@ -11,16 +11,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { updateProfile } from "@/app/space/edit/actions";
+import { uploadFile } from "@/app/space/upload-action"; // Import the upload action
 
 export default function EditProfileForm({ config, social }: { config: any, social: any }) {
   const [previewUrl, setPreviewUrl] = useState(config?.avatarUrl || "https://github.com/shadcn.png");
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Show local preview immediately
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+
+      // Upload immediately or wait for submit? 
+      // The current flow suggests we just select file and upload on submit OR upload now and store URL.
+      // The form expects 'avatarUrl' hidden input.
+      // Let's upload now to get the blob URL, which is safer for form submission.
+      
+      const toastId = toast.loading("头像上传中...");
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await uploadFile(formData);
+        
+        if (res.error) {
+          toast.error(res.error, { id: toastId });
+        } else {
+          toast.success("头像上传成功", { id: toastId });
+          setPreviewUrl(res.url); // Update preview to remote URL
+          // We need to update the hidden input value too, or state that controls it
+        }
+      } catch (err) {
+        toast.error("上传失败", { id: toastId });
+      }
     }
   };
 
@@ -30,12 +54,17 @@ export default function EditProfileForm({ config, social }: { config: any, socia
     
     try {
       const formData = new FormData(e.currentTarget);
-      // Append current avatarUrl if no new file is uploaded
-      // Note: server action handles file upload. If file is empty, we keep old url.
-      // But we need to make sure 'avatarUrl' field is passed if no file.
-      // Actually, my action logic uses 'avatarUrl' from formData if file is present? No.
-      // Let's check action. Action reads 'avatarUrl' string.
-      // We should put the current url in a hidden field so if no file, we keep it.
+      // If we uploaded a new avatar, we need to make sure the hidden input 'avatarUrl' has the new URL.
+      // But formData.get('avatarUrl') will get the value from the hidden input.
+      // The hidden input is uncontrolled: <input type="hidden" name="avatarUrl" value={config?.avatarUrl || ""} />
+      // This is problematic if we update previewUrl state but not the hidden input.
+      // FIX: Control the hidden input value.
+      
+      // Override avatarUrl in formData if we have a new previewUrl that starts with http (remote)
+      // Actually, easier way: add the updated URL to formData manually if it changed.
+      if (previewUrl !== config?.avatarUrl) {
+         formData.set('avatarUrl', previewUrl);
+      }
       
       const result = await updateProfile(formData);
       
@@ -60,7 +89,7 @@ export default function EditProfileForm({ config, social }: { config: any, socia
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit}>
-      <input type="hidden" name="avatarUrl" value={config?.avatarUrl || ""} />
+      <input type="hidden" name="avatarUrl" value={previewUrl} />
       
       {/* Basic Info Card */}
       <Card>
@@ -81,7 +110,7 @@ export default function EditProfileForm({ config, social }: { config: any, socia
               <div className="flex items-center gap-4">
                 <Input 
                   id="avatar-upload" 
-                  name="avatarFile" // Changed from 'avatar-upload' to match action
+                  name="avatarFile" 
                   type="file" 
                   accept="image/*"
                   className="hidden" 
@@ -94,9 +123,9 @@ export default function EditProfileForm({ config, social }: { config: any, socia
                   className="gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  上传图片
+                  上传头像
                 </Button>
-                <p className="text-xs text-gray-500">支持 JPG, PNG, GIF</p>
+                <p className="text-xs text-gray-500">支持 JPG, PNG</p>
               </div>
             </div>
           </div>
