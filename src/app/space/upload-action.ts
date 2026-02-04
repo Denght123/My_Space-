@@ -18,7 +18,8 @@ export async function uploadFile(formData: FormData) {
     // Upload to Vercel Blob
     const blob = await put(file.name, file, {
       access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN, // Ensure this env var is set
+      token: process.env.BLOB_READ_WRITE_TOKEN, 
+      addRandomSuffix: true, // Fix: Prevent filename conflicts
     });
 
     return { success: true, url: blob.url, filename: file.name, type: file.type };

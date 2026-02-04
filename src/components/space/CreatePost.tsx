@@ -27,6 +27,8 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  // Add state to track editor content status for button enabling
+  const [canPost, setCanPost] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -51,6 +53,11 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
       },
     },
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      // Force update button state on every keystroke
+      const hasContent = !editor.isEmpty || editor.getHTML().includes('<img');
+      setCanPost(hasContent);
+    },
   });
 
   const handleImageClick = () => {
@@ -99,12 +106,9 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
     editor?.chain().focus().toggleCodeBlock().run();
   };
 
-  // Check if content is valid (not empty or has image)
-  const hasContent = editor && (!editor.isEmpty || editor.getHTML().includes('<img'));
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!hasContent) return;
+    if (!canPost) return;
 
     setIsSubmitting(true);
     try {
@@ -122,6 +126,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
           style: { background: '#000', color: '#fff', border: 'none' }
         });
         editor?.commands.clearContent();
+        setCanPost(false); // Reset button state
       }
     } catch (error) {
       toast.error("发布失败，请重试");
