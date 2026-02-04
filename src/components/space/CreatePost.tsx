@@ -3,6 +3,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
+import Placeholder from '@tiptap/extension-placeholder';
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { createPost } from "@/app/space/actions";
@@ -37,6 +38,9 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
         inline: true,
         allowBase64: true,
       }),
+      Placeholder.configure({
+        placeholder: '分享你的新鲜事...',
+      }),
     ],
     content: '',
     editorProps: {
@@ -44,7 +48,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
         class: 'prose prose-sm max-w-none focus:outline-none min-h-[44px] px-2 py-2 text-sm',
       },
     },
-    immediatelyRender: false, // Fix hydration mismatch
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       // Optional: Logic on update
     }
@@ -136,11 +140,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
       <div className="relative mb-3">
         <EditorContent editor={editor} className="min-h-[44px]" />
         
-        {editor.isEmpty && (
-          <div className="absolute top-2 left-2 text-gray-400 text-sm pointer-events-none">
-            分享你的新鲜事...
-          </div>
-        )}
+        {/* Placeholder removed, using extension instead */}
         
         {isUploading && (
           <div className="absolute right-2 bottom-2">

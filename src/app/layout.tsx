@@ -37,11 +37,13 @@ export default async function RootLayout({
                 {session?.user?.id && <BackToMySpace currentUserId={session.user.id} />}
               </div>
               
-              {/* Search Bar - Flexible width */}
-              {session && (
+              {/* Search Bar - Flexible width - Strictly conditional */}
+              {session?.user ? (
                 <div className="flex-1 mx-2 w-full sm:max-w-md min-w-0">
                   <UserSearch />
                 </div>
+              ) : (
+                <div className="flex-1" />
               )}
 
               <nav className="shrink-0 flex items-center gap-2 sm:gap-4">
