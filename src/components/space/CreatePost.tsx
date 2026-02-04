@@ -226,7 +226,7 @@ export default function CreatePost({ user, authorName, avatarUrl }: { user: any,
           onClick={handleSubmit} 
           size="sm" 
           className="bg-black hover:bg-gray-800 text-white gap-2 rounded-full px-6 transition-all"
-          disabled={!hasContent || isSubmitting || isUploading}
+          disabled={!canPost || isSubmitting || isUploading}
         >
           <Send className="w-3 h-3" />
           {isSubmitting ? "发布中..." : "发布"}
